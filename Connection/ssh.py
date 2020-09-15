@@ -1,18 +1,11 @@
 from sshtunnel import SSHTunnelForwarder
 
 
-# with SSHTunnelForwarder(('211.253.26.214', 22),
-#                         ssh_username='anal',
-#                         ssh_password='b5j4Mj6YvA9P^^',
-#                         remote_bind_address=('localhost', 3306)
-#                         ) as tunnel:
-#     tunnel.start()
-
 class Tunnel:
     def __init__(self):
-        self.tunnel = SSHTunnelForwarder(('211.253.26.214', 22),
+        self.tunnel = SSHTunnelForwarder(('127.0.0.1', 22),
                                          ssh_username='anal',
-                                         ssh_password='b5j4Mj6YvA9P^^',
+                                         ssh_password='ssh_password',
                                          remote_bind_address=('localhost', 3306)
                                          )
 
