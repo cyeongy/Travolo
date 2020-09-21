@@ -2,10 +2,9 @@ from Connection import ssh, connect
 import pandas as pd
 import numpy
 import requests
-
+import pickle
 
 # 'pid', 'base_address', 'gps_lat', 'gps_long'
-
 not_found_list = []
 not_found_list_index = 0
 
@@ -29,7 +28,6 @@ with ssh.Tunnel() as tunnel:
         data = r.json()
         result = data['response']['status']
 
-
         if result == "OK":
             coordinate = data['response']['result']['point']
             df['gps_lat'].iloc[idx] = coordinate['y']
@@ -39,7 +37,6 @@ with ssh.Tunnel() as tunnel:
         else:
             not_found_list.append(df['pid'].iloc[idx])
             print(df['pid'].iloc[idx], result, addr, "\t", len(not_found_list))
-
 
     # insert data into mysql
     print("-----NOW INSERT-----")
@@ -58,3 +55,5 @@ with ssh.Tunnel() as tunnel:
         except Exception as e:
             print(e)
 
+with open('./not_found_base.bin', 'wb') as f:
+    pickle.dump(not_found_list, f)
