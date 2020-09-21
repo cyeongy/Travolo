@@ -11,11 +11,11 @@ class AnalysisCBF:
     distance = GPSDistance()
 
     # get uid and get analysis data from table
-    def __init__(self, uid=12):
+    def __init__(self, user_id=12):
         try:
             with ssh.Tunnel() as tunnel:
                 with connect.Connect(port=tunnel.local_bind_port) as conn:
-                    sql = "select * from analysis_tour where uid = {}".format(uid)
+                    sql = "select * from analysis_tour where uid = {}".format(user_id)
                     self.analy_df = pd.read_sql_query(sql, conn)
                     sql = "select * from crawling_tour"
                     self.tour_df = pd.read_sql_query(sql, conn)
@@ -70,8 +70,11 @@ class AnalysisCBF:
         #     self.distance.set_dst_gps(args[0], args[1])
 
     def get_distance(self, *args, **kwargs):
+        # print("args:", args)
+        # print("kwargs:", kwargs)
+
         if bool(args) or bool(kwargs):
-            print(bool(args) or bool(kwargs))
+            # print(bool(args) or bool(kwargs))
             self.set_dst_point(*args, **kwargs)
         return self.distance.get_distance()
 

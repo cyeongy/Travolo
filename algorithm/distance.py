@@ -63,6 +63,8 @@ class GPSDistance:
         else:
             self.dst_long = args[1]
 
+        # print(self.dst_lat, self.dst_long)
+
         if (str(type(self.dst_lat)) == "<class 'str'>") or (str(type(self.dst_long)) == "<class 'str'>"):
             self.dst_lat = float(self.dst_lat)
             self.dst_long = float(self.dst_long)
