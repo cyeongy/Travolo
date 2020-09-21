@@ -8,9 +8,10 @@ from algorithm.distance import GPSDistance
 class AnalysisCBF:
 
     pick_number = 4
+    distance = GPSDistance()
 
     # get uid and get analysis data from table
-    def __init__(self, uid):
+    def __init__(self, uid=12):
         try:
             with ssh.Tunnel() as tunnel:
                 with connect.Connect(port=tunnel.local_bind_port) as conn:
@@ -18,8 +19,11 @@ class AnalysisCBF:
                     self.analy_df = pd.read_sql_query(sql, conn)
                     sql = "select * from crawling_tour"
                     self.tour_df = pd.read_sql_query(sql, conn)
+                    # print(type(float(self.tour_df['gps_lat'].iloc[0])))
+                    self.tour_df.astype({'gps_lat': 'float64', 'gps_long': 'float64'})
                     sql = "select * from point"
                     self.base_df = pd.read_sql_query(sql, conn)
+                    # self.base_df.astype({'gps_lat': 'float32', 'gps_long': 'float'})
         except Exception as e:
             print(e)
 
@@ -40,6 +44,36 @@ class AnalysisCBF:
 
     def CBF(self):
         pass
+
+    def set_src_point(self, *args, **kwargs):
+        # print("anal-args:", args)
+        # print("anal-kwargs:", kwargs)
+
+        self.distance.set_src_gps(*args, **kwargs)
+        # if 'gps_lat' in kwargs.keys() and 'gps_long' in kwargs.keys():
+        #     self.distance.set_src_gps(kwargs)
+        # elif str(type(args[0])) == "<class 'dict'>" or str(type(args[0])) == "<class 'pandas.core.frame.DataFrame'>":
+        #     self.distance.set_src_gps(args[0])
+        # else:
+        #     self.distance.set_src_gps(args[0], args[1])
+
+    def set_dst_point(self, *args, **kwargs):
+        # print("anal-args:", args)
+        # print("anal-kwargs:", kwargs)
+
+        self.distance.set_dst_gps(*args, **kwargs)
+        # if 'gps_lat' in kwargs.keys() and 'gps_long' in kwargs.keys():
+        #     self.distance.set_dst_gps(kwargs)
+        # elif str(type(args[0])) == "<class 'dict'>" or str(type(args[0])) == "<class 'pandas.core.frame.DataFrame'>":
+        #     self.distance.set_dst_gps(args[0])
+        # else:
+        #     self.distance.set_dst_gps(args[0], args[1])
+
+    def get_distance(self, *args, **kwargs):
+        if bool(args) or bool(kwargs):
+            print(bool(args) or bool(kwargs))
+            self.set_dst_point(*args, **kwargs)
+        return self.distance.get_distance()
 
 
 
