@@ -1,4 +1,4 @@
-from Connection import ssh, connect
+from connection import ssh, connect
 import pandas as pd
 
 
@@ -8,6 +8,7 @@ with ssh.Tunnel() as tunnel:
     df = []
     # read sql data, make dataframe
     with connect.Connect(port=tunnel.local_bind_port) as conn:
-        sql = "select * from point"
+        sql = "select * from crawling_tour"
         df = pd.read_sql_query(sql, conn)
         print(df.columns)
+        print(df.index)

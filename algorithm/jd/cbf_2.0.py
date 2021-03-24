@@ -1,13 +1,12 @@
 import pandas as pd
 import numpy as np
-import warnings;
-
-warnings.filterwarnings('ignore')
+import warnings
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from konlpy.tag import Okt
 import time
+warnings.filterwarnings('ignore')
 
 start = time.time()
 places = pd.read_csv('Tour_info.csv')
@@ -43,47 +42,68 @@ places_df['rdfs:label'].fillna(' ')
 han = re.compile('[^ ㄱ-ㅎ | 가-힣 | 0-9 | a-z | A-Z ]+')
 places_df['grade'].fillna(value=0.0, inplace=True)
 places_df['number of reviews'].fillna(value=0.0, inplace=True)
-
+print("-------rdfs, lab 비교-------")
 places_df['lab'] = places_df['rdfs:label'].apply(lambda x: han.sub("", str(x)))
 places_df['des'] = places_df['dc:description'].apply(lambda x: han.sub("", str(x)))
-# print(places_df['rdfs:label'])
-# print(places_df['lab'])
+print(places_df['rdfs:label'])
+print(places_df['lab'])
+print()
+print(places_df['dc:description'])
+print(places_df['des'])
 # places_df.to_json(path_or_buf='./temp.json', orient='split')
+
+
 print("==데이터 전처리 작업 완료==")
 okt = Okt()
 print("==명사 추출 중...==")
 places_df['lab'] = places_df['lab'].apply(lambda x: okt.nouns(x))
 places_df['des'] = places_df['des'].apply(lambda x: okt.nouns(x))
+print(places_df['lab'])
+print(places_df['des'])
 print("==명사 추출 완료==")
 
 print("==추출된 문자 리스트를 문자열로 변환 중...==")
 places_df['lab'] = places_df['lab'].apply(lambda x: (' ').join(x))
 places_df['des'] = places_df['des'].apply(lambda x: (' ').join(x))
+print(places_df['lab'])
+print(places_df['des'])
+print()
 places_df['des'] = places_df[['des', 'ktop:category']].apply(lambda x: (' ').join(x), axis=1)
 places_df['lab'] = places_df[['lab', 'rdf:type']].apply(lambda x: (' ').join(x), axis=1)
+print(places_df['lab'])
+print(places_df['des'])
 print("==문자열로 재 변환 완료==")
 
 count_vect = CountVectorizer(min_df=0, ngram_range=(1, 2))
+print(count_vect)
 
 print("==유사도 벡터화 작업 중==")
 cat_mat1 = count_vect.fit_transform(places_df['des'])
 cat_mat2 = count_vect.fit_transform(places_df['lab'])
+
+
+
+print("cat_mat1", cat_mat1.shape, cat_mat1, "cat_mat2", cat_mat2.shape, cat_mat2, sep="\n")
 
 cat_sim1 = cosine_similarity(cat_mat1, cat_mat1)
 cat_sim2 = cosine_similarity(cat_mat2, cat_mat2)
 cat_sim1 *= 0.9
 cat_sim2 *= 0.1
 
+print("cat_sim1", cat_sim1.shape, cat_sim1, "cat_sim2", cat_sim2.shape, cat_sim2, sep="\n")
+
 print("==행렬화 완료!==")
 
 cat_sim = cat_sim1 + cat_sim2
+
 print(cat_sim.shape)
 print(cat_sim)
 
 print(time.time() - start)
 
-place_sim_sorted_ind = cat_sim.argsort()[:, ::-1]
 
+place_sim_sorted_ind = cat_sim.argsort()[:, ::-1]
+print(place_sim_sorted_ind)
 
 # print(place_sim_sorted_ind[:1])
 

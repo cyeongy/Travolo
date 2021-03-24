@@ -2,12 +2,11 @@ import pymysql
 
 
 class Connect:
-
     def __init__(self, port=3306):
         self.conn = pymysql.connect(host='localhost',
                                     port=port,
-                                    user='client',
-                                    password='cjs0701^^',
+                                    user='analy',
+                                    password='ajs0701^^',
                                     charset='utf8',
                                     db='jsdb')
 

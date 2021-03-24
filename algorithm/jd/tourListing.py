@@ -1,10 +1,10 @@
-import Analysis as analy
+from algorithm import Analysis as analy
 from multiprocessing import shared_memory
 import pandas as pd
 import time
 
-def make_tourList(base_point, user_id, range = 20.0):
 
+def make_tourList(base_point, user_id, range=20.0):
     place_sim_sorted_ind = shared_memory.SharedMemory(name='CBF_Matrix')
     item_sim_df = pd.read_csv('item_sim.csv')
 
@@ -36,8 +36,8 @@ def make_tourList(base_point, user_id, range = 20.0):
 
     for i in a.analy_df['TID']:
         similar_place = item_sim_df[f'{i}'].sort_values(ascending=False)[1:50]
-        #print(type(similar_place))
-        #print(similar_place)
+        # print(type(similar_place))
+        # print(similar_place)
 
         for l in similar_place.index:
             anal_dst = a.tour_df[a.tour_df['TID'] == l]
@@ -59,7 +59,7 @@ def make_tourList(base_point, user_id, range = 20.0):
             a.set_dst_point(anal_dst)
 
             if a.get_distance() <= range:
-                result_df = result_df.append(anal_dst,ignore_index=True)
+                result_df = result_df.append(anal_dst, ignore_index=True)
 
             # print(result_df)
 
@@ -69,6 +69,6 @@ def make_tourList(base_point, user_id, range = 20.0):
 
     t = t.sample(frac=1).reset_index(drop=True)
 
-    #print(f'종료합니다 소요시간 : {time.time() - start}')
+    # print(f'종료합니다 소요시간 : {time.time() - start}')
 
     return t

@@ -9,6 +9,7 @@ not_found_list_idx = 0
 point = 0
 frequency = 100
 
+# 지금까지 탐색한 여행지의 검색오류 여행지 숫자, 최종 검색 포인트 확인
 try:
     with open('./not_found_list.bin', 'rb') as f:
         not_found_list = pickle.load(f)
@@ -36,6 +37,7 @@ with ssh.Tunnel() as tunnel:
     try:
         start_point = point
         while start_point < len(df.index):
+            # 크롤링한 address를 기반으로 gps_lat, gps_long 크롤링
             print("-----NOW CRAWLING-----", start_point)
             temp = start_point
             temp2 = start_point
@@ -61,6 +63,7 @@ with ssh.Tunnel() as tunnel:
             except Exception as e:
                 print("crawling:", e)
 
+            # DB에 크롤링한 GPS 주소 삽입
             print("-----NOW INSERT-----", start_point)
             try:
                 with connect.Connect(port=tunnel.local_bind_port) as conn:
@@ -97,18 +100,21 @@ with ssh.Tunnel() as tunnel:
                         conn.commit()
                 point = start_point
 
+                # 지금까지 기록해둔 미확인 주소 기록
                 with open('./not_found_list.bin', 'wb') as f:
                     pickle.dump(not_found_list, f)
                     pickle.dump(point, f)
             except Exception as e:
                 print("insert:", e)
 
+    # 에러 발생시 여태까지 기록해둔 미확인 주소 기록
     except Exception as e:
         with open('./not_found_list.bin', 'wb') as f:
             pickle.dump(not_found_list, f)
             pickle.dump(point, f)
         print(e)
 
+# 에러 발생시 여태까지 기록해둔 미확인 주소 기록
 with open('./not_found_list.bin', 'wb') as f:
     pickle.dump(not_found_list, f)
     pickle.dump(point, f)

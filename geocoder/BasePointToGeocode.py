@@ -43,7 +43,6 @@ with ssh.Tunnel() as tunnel:
     with connect.Connect(port=tunnel.local_bind_port) as conn:
         try:
             with conn.cursor() as cur:
-
                 for idx in range(len(df.index)):
                     sql_update = "UPDATE point SET gps_lat = %s, gps_long = %s WHERE pid = %s "
                     print(df.iloc[idx])
@@ -55,5 +54,7 @@ with ssh.Tunnel() as tunnel:
         except Exception as e:
             print(e)
 
+
+# 에러 발생시 여태까지 기록해둔 미확인 주소 기록
 with open('./not_found_base.bin', 'wb') as f:
     pickle.dump(not_found_list, f)

@@ -6,7 +6,6 @@ from algorithm.distance import GPSDistance
 
 # TOUR_NO | UID | TID   | GRADE
 class AnalysisCBF:
-
     pick_number = 4
     distance = GPSDistance()
 
@@ -15,15 +14,15 @@ class AnalysisCBF:
         try:
             with ssh.Tunnel() as tunnel:
                 with connect.Connect(port=tunnel.local_bind_port) as conn:
-                    sql = "select * from analysis_tour where uid = {}".format(user_id)
-                    self.analy_df = pd.read_sql_query(sql, conn)
-                    sql = "select * from crawling_tour"
-                    self.tour_df = pd.read_sql_query(sql, conn)
-                    # print(type(float(self.tour_df['gps_lat'].iloc[0])))
-                    self.tour_df.astype({'gps_lat': 'float64', 'gps_long': 'float64'})
-                    sql = "select * from point"
-                    self.base_df = pd.read_sql_query(sql, conn)
-                    # self.base_df.astype({'gps_lat': 'float32', 'gps_long': 'float'})
+                    sql1 = "select * from analysis_tour where uid = {}".format(user_id)
+                    self.analy_df = pd.read_sql_query(sql1, conn)
+                    self.analy_df.drop_duplicates(['TID'], inplace=True)
+
+                    sql2 = "select * from crawling_tour"
+                    self.tour_df = pd.read_sql_query(sql2, conn)
+
+                    sql3 = "select * from point"
+                    self.base_df = pd.read_sql_query(sql3, conn)
         except Exception as e:
             print(e)
 
@@ -50,24 +49,12 @@ class AnalysisCBF:
         # print("anal-kwargs:", kwargs)
 
         self.distance.set_src_gps(*args, **kwargs)
-        # if 'gps_lat' in kwargs.keys() and 'gps_long' in kwargs.keys():
-        #     self.distance.set_src_gps(kwargs)
-        # elif str(type(args[0])) == "<class 'dict'>" or str(type(args[0])) == "<class 'pandas.core.frame.DataFrame'>":
-        #     self.distance.set_src_gps(args[0])
-        # else:
-        #     self.distance.set_src_gps(args[0], args[1])
 
     def set_dst_point(self, *args, **kwargs):
         # print("anal-args:", args)
         # print("anal-kwargs:", kwargs)
 
         self.distance.set_dst_gps(*args, **kwargs)
-        # if 'gps_lat' in kwargs.keys() and 'gps_long' in kwargs.keys():
-        #     self.distance.set_dst_gps(kwargs)
-        # elif str(type(args[0])) == "<class 'dict'>" or str(type(args[0])) == "<class 'pandas.core.frame.DataFrame'>":
-        #     self.distance.set_dst_gps(args[0])
-        # else:
-        #     self.distance.set_dst_gps(args[0], args[1])
 
     def get_distance(self, *args, **kwargs):
         # print("args:", args)
@@ -78,5 +65,36 @@ class AnalysisCBF:
             self.set_dst_point(*args, **kwargs)
         return self.distance.get_distance()
 
+    def get_route(self, tour_list):
+        result = []
+        temp = self.tour_df[['TID', 'gps_lat', 'gps_long']]
+        temp.set_index('TID', inplace=True)
 
+        distance = [[1000 for i in range(len(tour_list))] for j in range(len(tour_list))]
+        visited = [False for i in range(len(tour_list))]
+        check = [True for i in range(len(tour_list))]
 
+        for i in range(len(tour_list)):
+            self.set_src_point(temp.loc[tour_list[i]])
+            for j in range(len(tour_list)):
+                if i == j:
+                    continue
+                distance[i][j] = self.get_distance(temp.loc[tour_list[j]])
+
+        now = 0
+        while not check == visited:
+            result.append(tour_list[now])
+            visited[now] = True
+            ok = True
+            while ok:
+                if check == visited:
+                    break
+                pick = distance[now].index(min(distance[now]))
+                if visited[pick]:
+                    distance[now][pick] = 1000
+                else:
+                    ok = False
+
+            now = pick
+
+        return result

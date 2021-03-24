@@ -3,7 +3,9 @@ import pandas as pd
 
 a = anal(user_id=12)
 
-anal_src = a.tour_df.iloc[0]
+a.tour_df.set_index('TID', inplace=True)
+
+anal_src = a.base_df.iloc[0]
 anal_dst = a.tour_df.iloc[1]
 
 # 출발 포인트 설정
